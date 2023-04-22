@@ -1,0 +1,79 @@
+linters:
+  enable-all: true
+  disable:
+    - goerr113
+    - gosec
+    - nlreturn
+    - stylecheck
+    - wsl
+    - exhaustivestruct
+    - tagliatelle
+    - paralleltest
+    - ireturn
+    - nosnakecase
+    - nonamedreturns
+    - exhaustruct
+    - prealloc
+
+    #### Disabled because of generics:
+    - rowserrcheck
+    - sqlclosecheck
+    - structcheck
+    # - wastedassign
+
+    #### Should be permanently disabled:
+    - gochecknoglobals
+    - gochecknoinits
+    - gomnd
+    - interfacer
+    - maligned
+    - noctx
+    - testpackage
+    - scopelint
+    - golint
+    - deadcode
+    - varcheck
+    - ifshort
+
+linters-settings:
+  exhaustive:
+    default-signifies-exhaustive: true
+  goimports:
+    local-prefixes: github.com/gmikhaile/links
+  lll:
+    line-length: 120
+  gosimple:
+    checks: ["all"]
+  staticcheck:
+    checks: ["all"]
+  gocritic:
+    enabled-tags:
+      - experimental
+      - diagnostic
+    enabled-checks:
+      - appendCombine
+  gci:
+    sections:
+      - standard
+      - default
+      - prefix(github.com/gmikhaile/links)
+  varnamelen:
+    min-name-length: 2
+  nolintlint:
+    # Disable to ensure that all nolint directives actually have an effect.
+    # Default: false
+    allow-unused: true
+
+run:
+  deadline: 5m
+
+issues:
+  exclude-use-default: false
+  exclude:
+    - "(comment on exported (method|function|type|const)|should have( a package)? comment|comment should be of the form)"
+  exclude-rules:
+     # Exclude some linters from running on tests files.
+    - path: _test\.go
+      linters:
+        - lll
+        - funlen
