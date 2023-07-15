@@ -6,19 +6,19 @@ import (
 	"github.com/google/uuid"
 	gc "gopkg.in/check.v1"
 
-	"github.com/gmikhaile/links/linkgraph"
+	"github.com/gmikhaile/links/graph"
 )
 
 type SuiteBase struct {
-	g linkgraph.Graph
+	g graph.Graph
 }
 
-func (s *SuiteBase) SetGraph(g linkgraph.Graph) {
+func (s *SuiteBase) SetGraph(g graph.Graph) {
 	s.g = g
 }
 
 func (s *SuiteBase) TestUpserNewLink(check *gc.C) {
-	actual, err := s.g.UpsertLink(linkgraph.Link{
+	actual, err := s.g.UpsertLink(graph.Link{
 		URL:         "test upsert new link",
 		RetreivedAt: time.Now(),
 	})
@@ -27,7 +27,7 @@ func (s *SuiteBase) TestUpserNewLink(check *gc.C) {
 }
 
 func (s *SuiteBase) TestUpdateLink(check *gc.C) {
-	actual, err := s.g.UpsertLink(linkgraph.Link{
+	actual, err := s.g.UpsertLink(graph.Link{
 		URL:         "test update link",
 		RetreivedAt: time.Now(),
 	})

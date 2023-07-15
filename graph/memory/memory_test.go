@@ -5,7 +5,7 @@ import (
 
 	"gopkg.in/check.v1"
 
-	"github.com/gmikhaile/links/linkgraph/graphtest"
+	"github.com/gmikhaile/links/graph/graphtest"
 )
 
 var _ = check.Suite(new(InMemoryGraphTestSuite))

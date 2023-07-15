@@ -1,6 +1,6 @@
 package memory
 
-import graph "github.com/gmikhaile/links/linkgraph"
+import graph "github.com/gmikhaile/links/graph"
 
 var _ graph.LinkIterator = (*linkIterator)(nil)
 

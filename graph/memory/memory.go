@@ -7,31 +7,31 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/gmikhaile/links/linkgraph"
+	"github.com/gmikhaile/links/graph"
 )
 
-var _ linkgraph.Graph = (*Graph)(nil)
+var _ graph.Graph = (*Graph)(nil)
 
 type Graph struct {
 	mu sync.RWMutex
 
-	links    map[uuid.UUID]*linkgraph.Link
-	linksURL map[string]*linkgraph.Link
+	links    map[uuid.UUID]*graph.Link
+	linksURL map[string]*graph.Link
 
-	edges     map[uuid.UUID]*linkgraph.Edge // edge ID to edge
-	linkEdges map[uuid.UUID][]uuid.UUID     // link ID to slice of edge IDs
+	edges     map[uuid.UUID]*graph.Edge // edge ID to edge
+	linkEdges map[uuid.UUID][]uuid.UUID // link ID to slice of edge IDs
 }
 
 func NewMemoryGraph() *Graph {
 	return &Graph{
-		links:     make(map[uuid.UUID]*linkgraph.Link),
-		linksURL:  make(map[string]*linkgraph.Link),
-		edges:     make(map[uuid.UUID]*linkgraph.Edge),
+		links:     make(map[uuid.UUID]*graph.Link),
+		linksURL:  make(map[string]*graph.Link),
+		edges:     make(map[uuid.UUID]*graph.Edge),
 		linkEdges: make(map[uuid.UUID][]uuid.UUID),
 	}
 }
 
-func (g *Graph) UpsertLink(link linkgraph.Link) (linkgraph.Link, error) {
+func (g *Graph) UpsertLink(link graph.Link) (graph.Link, error) {
 	g.mu.Lock()
 	defer g.mu.Unlock()
 
@@ -43,13 +43,13 @@ func (g *Graph) UpsertLink(link linkgraph.Link) (linkgraph.Link, error) {
 		return *existing, nil
 	}
 
-	newLink := new(linkgraph.Link)
+	newLink := new(graph.Link)
 	*newLink = link
 
 	for {
 		id, err := uuid.NewRandom()
 		if err != nil {
-			return linkgraph.Link{}, fmt.Errorf("can't generate uuid: %w", err)
+			return graph.Link{}, fmt.Errorf("can't generate uuid: %w", err)
 		}
 
 		if _, ok := g.links[id]; ok {
@@ -66,13 +66,13 @@ func (g *Graph) UpsertLink(link linkgraph.Link) (linkgraph.Link, error) {
 	return *newLink, nil
 }
 
-func (g *Graph) FindLink(id uuid.UUID) (linkgraph.Link, error) {
+func (g *Graph) FindLink(id uuid.UUID) (graph.Link, error) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
 	link, ok := g.links[id]
 	if !ok {
-		return linkgraph.Link{}, fmt.Errorf("link with id `%v` is not found", id)
+		return graph.Link{}, fmt.Errorf("link with id `%v` is not found", id)
 	}
 
 	return *link, nil
@@ -80,14 +80,14 @@ func (g *Graph) FindLink(id uuid.UUID) (linkgraph.Link, error) {
 
 func (g *Graph) Links(
 	from, to uuid.UUID, retrievedBefore time.Time,
-) (linkgraph.LinkIterator, error) {
+) (graph.LinkIterator, error) {
 	fromStr := from.String()
 	toStr := to.String()
 
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
-	var links []*linkgraph.Link
+	var links []*graph.Link
 	for _, link := range g.links {
 		linkIDstr := link.ID.String()
 		isInRangeFromTo := linkIDstr >= fromStr && linkIDstr < toStr
@@ -111,14 +111,14 @@ func (g *Graph) Links(
 	}, nil
 }
 
-func (g *Graph) UpsertEdge(edge linkgraph.Edge) (linkgraph.Edge, error) {
+func (g *Graph) UpsertEdge(edge graph.Edge) (graph.Edge, error) {
 	g.mu.Lock()
 	defer g.mu.Unlock()
 
 	_, fromOk := g.links[edge.From]
 	_, toOk := g.links[edge.To]
 	if !fromOk || !toOk {
-		return linkgraph.Edge{}, fmt.Errorf("edge is not valid `%v`", edge)
+		return graph.Edge{}, fmt.Errorf("edge is not valid `%v`", edge)
 	}
 
 	for _, edgeID := range g.linkEdges[edge.From] {
@@ -131,14 +131,14 @@ func (g *Graph) UpsertEdge(edge linkgraph.Edge) (linkgraph.Edge, error) {
 		return *existingEdge, nil
 	}
 
-	newEdge := new(linkgraph.Edge)
+	newEdge := new(graph.Edge)
 	*newEdge = edge
 	newEdge.UpdatedAt = time.Now()
 
 	for {
 		id, err := uuid.NewRandom()
 		if err != nil {
-			return linkgraph.Edge{}, fmt.Errorf("can't generate uuid: %w", err)
+			return graph.Edge{}, fmt.Errorf("can't generate uuid: %w", err)
 		}
 
 		if _, ok := g.edges[id]; ok {
@@ -155,14 +155,14 @@ func (g *Graph) UpsertEdge(edge linkgraph.Edge) (linkgraph.Edge, error) {
 	return *newEdge, nil
 }
 
-func (g *Graph) Edges(from, to uuid.UUID, updated time.Time) (linkgraph.EdgeIterator, error) {
+func (g *Graph) Edges(from, to uuid.UUID, updated time.Time) (graph.EdgeIterator, error) {
 	fromStr := from.String()
 	toStr := to.String()
 
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
-	var edges []*linkgraph.Edge
+	var edges []*graph.Edge
 	for linkID := range g.links {
 		linkIDstr := linkID.String()
 		isInRangeFromTo := linkIDstr >= fromStr && linkIDstr < toStr

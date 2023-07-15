@@ -1,4 +1,4 @@
-package linkgraph
+package graph
 
 import (
 	"time"
